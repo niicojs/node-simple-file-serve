@@ -34,21 +34,23 @@ app.get('*', async (req, res) => {
   if (!fs.existsSync(folder)) {
     res.status(404).send('Not found');
   } else if (!fs.lstatSync(folder).isDirectory()) {
-    res.send(folder);
+    res.sendFile(folder);
   } else {
     const all = await fs.promises.readdir(folder);
     const files = [];
     for (const f of all) {
-      const stats = await fs.promises.lstat(path.join(folder, f));
-      let base = url.pathname;
-      if (!url.pathname.endsWith('/')) base += '/';
-      files.push({
-        name: f,
-        full: `${Url.resolve(base, f)}${url.query ? `?${url.query}` : ''}`,
-        isDir: stats.isDirectory(),
-        size: stats.isDirectory() ? '-' : prettysize(stats.size),
-        modified: formatDate(stats.mtime, 'DD/MM/YYYY HH:mm:ss')
-      });
+      if (!f.startsWith('.')) {
+        const stats = await fs.promises.lstat(path.join(folder, f));
+        let base = url.pathname;
+        if (!url.pathname.endsWith('/')) base += '/';
+        files.push({
+          name: f,
+          full: `${Url.resolve(base, f)}${url.query ? `?${url.query}` : ''}`,
+          isDir: stats.isDirectory(),
+          size: stats.isDirectory() ? '-' : prettysize(stats.size),
+          modified: formatDate(stats.mtime, 'DD/MM/YYYY HH:mm:ss')
+        });
+      }
     }
     files.sort((a, b) => {
       if (a.isDir === b.isDir) {
