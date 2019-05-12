@@ -14,11 +14,22 @@ const app = express();
 app.set('view engine', 'ejs');
 
 app.use((req, res, next) => {
-  const url = Url.parse(req.url);
-  if (url.query) {
-    const qs = querystring.parse(url.query);
-    if (qs.token) {
-      const token = qs.token.toString();
+  try {
+    let token = '';
+    const auth = req.header('authorization');
+    if (auth && auth.startsWith('Basic ')) {
+      token = Buffer.from(auth.substring(6), 'base64').toString();
+      token = token.substring(0, token.length - 1);
+    } else {
+      const url = Url.parse(req.url);
+      if (url.query) {
+        const qs = querystring.parse(url.query);
+        if (qs.token) {
+          token = qs.token.toString();
+        }
+      }
+    }
+    if (token) {
       if (token in config.tokens) {
         const permission = config.tokens[token];
         if (permission === 'admin' || new RegExp(permission).test(req.url)) {
@@ -26,7 +37,7 @@ app.use((req, res, next) => {
         }
       }
     }
-  }
+  } catch (e) {}
   console.log(`Unauthorized access to ${req.url}`);
   res.status(401).send('Nope');
 });
@@ -38,7 +49,7 @@ app.get('*', async (req, res) => {
   if (!fs.existsSync(folder)) {
     res.status(404).send('Not found');
   } else if (!fs.lstatSync(folder).isDirectory()) {
-    console.log(`Getting file ${folder}`);
+    // console.log(`Getting file ${folder}`);
     res.sendFile(folder);
   } else {
     console.log(`Listing files in ${folder}`);
@@ -49,12 +60,16 @@ app.get('*', async (req, res) => {
         const stats = await fs.promises.lstat(path.join(folder, f));
         let base = url.pathname;
         if (!url.pathname.endsWith('/')) base += '/';
+        let full = Url.resolve(base, f);
+        full += stats.isDirectory() ? '/' : '';
+        full += url.query ? `?${url.query}` : '';
         files.push({
           name: f,
-          full: `${Url.resolve(base, f)}${url.query ? `?${url.query}` : ''}`,
+          full,
           isDir: stats.isDirectory(),
           size: stats.isDirectory() ? '-' : prettysize(stats.size),
-          modified: formatDate(stats.mtime, 'DD/MM/YYYY HH:mm:ss')
+          modifiediso: stats.mtime.toISOString(),
+          modified: formatDate(stats.mtime, 'YYYY-MM-DD HH:mm:ss')
         });
       }
     }

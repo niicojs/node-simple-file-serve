@@ -66,7 +66,7 @@
                 </a>
               </td>
               <td><%= file.size %></td>
-              <td><%= file.modified %></td>
+              <td><time datetime="<%= file.modifiediso %>"><%= file.modified %></time></td>
               <td></td>
             </tr>
             <% }); %>
