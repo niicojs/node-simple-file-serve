@@ -1,0 +1,9 @@
+{
+  "server": {
+    "wwwroot": "/data",
+    "port": 8080
+  },
+  "tokens": {
+    "secret": ".*"
+  }
+}

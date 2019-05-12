@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title><%= path %></title>
+    <% include ./partials/styles %>
+  </head>
+  <body>
+    <% include ./partials/svg %>
+    <header>
+      <h1>
+        <a href=""><%= path %></a>
+      </h1>
+    </header>
+    <main>
+      <div class="listing">
+        <table aria-describedby="summary">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Name</th>
+              <th>Size</th>
+              <th>Modified</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if(up) { %>
+              <tr class="file">
+                <td></td>
+                <td>
+                  <a href="<%= up %>">
+                    <svg
+                      width="1.5em"
+                      height="1em"
+                      version="1.1"
+                      viewBox="0 0 317 259"
+                    >
+                      <use xlink:href="#folder"></use>
+                    </svg>
+                    <span class="name">..</span>
+                  </a>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            <% } %>
+            <% files.forEach(function(file) { %>
+            <tr class="file">
+              <td></td>
+              <td>
+                <a href="<%= file.full %>">
+                  <svg
+                    width="1.5em"
+                    height="1em"
+                    version="1.1"
+                    viewBox="0 0 317 259"
+                  >
+                    <use
+                      xlink:href="#<%= file.isDir ? 'folder' : 'file' %>"
+                    ></use>
+                  </svg>
+                  <span class="name"><%= file.name %></span>
+                </a>
+              </td>
+              <td><%= file.size %></td>
+              <td><%= file.modified %></td>
+              <td></td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>
