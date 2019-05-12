@@ -78,5 +78,5 @@ app.get('*', async (req, res) => {
   }
   config = JSON.parse(json);
   console.log(config);
-  app.listen(config.server.port);
+  app.listen(8080);
 })();

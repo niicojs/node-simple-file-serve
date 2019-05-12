@@ -1,7 +1,6 @@
 {
   "server": {
-    "wwwroot": "/data",
-    "port": 8080
+    "wwwroot": "/data"
   },
   "tokens": {
     "secret": ".*"
