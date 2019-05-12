@@ -17,13 +17,17 @@ app.use((req, res, next) => {
   const url = Url.parse(req.url);
   if (url.query) {
     const qs = querystring.parse(url.query);
-    if (qs.token && qs.token in config.tokens) {
-      const permission = config.tokens[qs.token.toString()];
-      if (permission === 'admin' || new RegExp(permission).test(req.url)) {
-        return next();
+    if (qs.token) {
+      const token = qs.token.toString();
+      if (token in config.tokens) {
+        const permission = config.tokens[token];
+        if (permission === 'admin' || new RegExp(permission).test(req.url)) {
+          return next();
+        }
       }
     }
   }
+  console.log(`Unauthorized access to ${req.url}`);
   res.status(401).send('Nope');
 });
 
@@ -34,8 +38,10 @@ app.get('*', async (req, res) => {
   if (!fs.existsSync(folder)) {
     res.status(404).send('Not found');
   } else if (!fs.lstatSync(folder).isDirectory()) {
+    console.log(`Getting file ${folder}`);
     res.sendFile(folder);
   } else {
+    console.log(`Listing files in ${folder}`);
     const all = await fs.promises.readdir(folder);
     const files = [];
     for (const f of all) {
