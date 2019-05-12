@@ -18,7 +18,6 @@
     "dotenv": "^8.0.0",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
-    "prettysize": "^2.0.0",
-    "sqlite": "^3.0.3"
+    "prettysize": "^2.0.0"
   }
 }
