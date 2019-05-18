@@ -11,7 +11,7 @@ Allow user to hide file from rclone from the UI so it's not sync.
 docker run -d \
     --name simple-file-serve \
     --restart=always \
-    -e PGID=1000 -e PUID=1000 \
+    --user node \
     --network=cloudbox \
     --network-alias=simple-file-serve \
     -v /opt/simple-file-serve/:/config \
