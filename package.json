@@ -17,7 +17,7 @@
     "dotenv": "^8.0.0",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
-    "level": "^5.0.1",
+    "nedb-promises": "^3.0.5",
     "prettysize": "^2.0.0"
   }
 }

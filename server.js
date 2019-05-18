@@ -8,7 +8,7 @@ const querystring = require('querystring');
 const express = require('express');
 const formatDate = require('date-fns/format');
 const prettysize = require('prettysize');
-const level = require('level');
+const Datastore = require('nedb-promises');
 
 let config = {};
 let db = undefined;
@@ -38,14 +38,11 @@ app.use((req, res, next) => {
     if (token) {
       if (token in config.tokens) {
         const permission = config.tokens[token];
-        if (permission === 'admin') req['user'] = 'admin';
-        if (req.url.startsWith('/api/')) {
-          if (permission === 'admin') {
-            // only admin can call api
-            next();
-          }
-        } else {
-          if (permission === 'admin' || new RegExp(permission).test(req.url)) {
+        if (permission === 'admin') {
+          req['user'] = 'admin';
+          return next();
+        } else if (!req.url.startsWith('/api/')) {
+          if (new RegExp(permission).test(req.url)) {
             return next();
           }
         }
@@ -72,12 +69,12 @@ app.post('/api', async (req, res) => {
       console.log(`Hide ${pathname}`);
       const file = path.normalize(path.join(config.server.wwwroot, pathname));
       let hidefile = true;
-      try {
-        await db.get(file);
-        await db.del(file);
+      const exists = await db.findOne({ file });
+      if (exists) {
         hidefile = false;
-      } catch (e) {
-        await db.put(file, 'hide');
+        await db.remove({ file });
+      } else {
+        await db.insert({ file });
       }
       return res.send({ ok: true, hide: hidefile });
     }
@@ -109,10 +106,8 @@ app.get('*', async (req, res) => {
           if (!url.pathname.endsWith('/')) base += '/';
           let hidden = false;
           if (!isDir) {
-            try {
-              await db.get(path.join(folder, f));
-              hidden = true;
-            } catch (e) {}
+            const exists = await db.findOne({ file: path.join(folder, f) });
+            hidden = !!exists;
           }
           if (!req['sync'] || !hidden) {
             let full = Url.resolve(base, f);
@@ -162,10 +157,13 @@ app.get('*', async (req, res) => {
       configlocation = '/config/config.json';
       dblocation = '/data/db.db';
     }
-    db = level(dblocation);
+
+    db = new Datastore({ filename: dblocation, autoload: true });
+
     const json = await fs.promises.readFile(configlocation, 'utf8');
     config = JSON.parse(json);
     console.log(config);
+
     app.listen(config.server.port);
   } catch (e) {
     console.error(e);
