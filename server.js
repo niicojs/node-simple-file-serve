@@ -150,16 +150,19 @@ app.get('*', async (req, res) => {
 });
 
 (async () => {
-  let json = '{}';
-  let dblocation = 'db.db';
-  if (fs.existsSync('/config/config.json')) {
-    json = await fs.promises.readFile('/config/config.json', 'utf8');
-    dblocation = '/data/db.db';
-  } else if (fs.existsSync('config.json')) {
-    json = await fs.promises.readFile('config.json', 'utf8');
+  try {
+    let configlocation = 'config.json';
+    let dblocation = 'db.db';
+    if (fs.existsSync('/config/config.json')) {
+      configlocation = '/config/config.json';
+      dblocation = '/data/db.db';
+    }
+    db = level(dblocation);
+    const json = await fs.promises.readFile(configlocation, 'utf8');
+    config = JSON.parse(json);
+    console.log(config);
+    app.listen(8080);
+  } catch (e) {
+    console.error(e);
   }
-  db = level(dblocation);
-  config = JSON.parse(json);
-  console.log(config);
-  app.listen(8080);
 })();
