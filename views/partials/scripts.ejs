@@ -1,0 +1,27 @@
+<script>
+  window.hide = (elt, file) => {
+    alert(file);
+  };
+
+  window.remove = async (elt, file) => {
+    const resp = await fetch('/api' + window.location.search, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: 'DELETE',
+        file
+      })
+    });
+    const result = await resp.json();
+    if (result.ok) {
+      let tr = elt;
+      while (tr.tagName !== 'TR') {
+        tr = tr.parentNode;
+      }
+      tr.parentNode.removeChild(tr);
+    }
+  };
+</script>

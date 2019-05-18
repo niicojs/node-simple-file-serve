@@ -80,6 +80,10 @@
     margin-right: 1em;
   }
 
+  .button {
+    cursor: pointer;
+  }
+
   #filter {
     padding: 4px;
     border: 1px solid #ccc;
@@ -128,17 +132,21 @@
     width: 80%;
   }
 
+  td:nth-child(2) svg {
+    position: absolute;
+  }
+
   td:nth-child(3) {
     padding: 0 20px 0 20px;
   }
 
-  th:nth-child(4),
   td:nth-child(4) {
-    text-align: right;
+    padding: 0 20px 0 20px;
   }
 
-  td:nth-child(2) svg {
-    position: absolute;
+  th:nth-child(5),
+  td:nth-child(5) {
+    text-align: right;
   }
 
   td .name,
@@ -147,36 +155,6 @@
     word-break: break-all;
     overflow-wrap: break-word;
     white-space: pre-wrap;
-  }
-
-  .icon {
-    margin-right: 5px;
-  }
-
-  .icon.sort {
-    display: inline-block;
-    width: 1em;
-    height: 1em;
-    position: relative;
-    top: 0.2em;
-  }
-
-  .icon.sort .top {
-    position: absolute;
-    left: 0;
-    top: -1px;
-  }
-
-  .icon.sort .bottom {
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-  }
-
-  footer {
-    padding: 40px 20px;
-    font-size: 12px;
-    text-align: center;
   }
 
   @media (max-width: 600px) {

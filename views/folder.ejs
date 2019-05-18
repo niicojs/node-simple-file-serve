@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title><%= path %></title>
-    <% include ./partials/styles %>
+    <%- include ./partials/styles %> 
+    <% if (admin) { %>
+      <%- include ./partials/scripts %> 
+    <% } %>
   </head>
   <body>
-    <% include ./partials/svg %>
+    <%- include ./partials/svg %>
     <header>
       <h1>
         <a href=""><%= path %></a>
@@ -21,32 +24,34 @@
             <tr>
               <th></th>
               <th>Name</th>
+              <th></th>
               <th>Size</th>
               <th>Modified</th>
             </tr>
           </thead>
           <tbody>
             <% if(up) { %>
-              <tr class="file">
-                <td></td>
-                <td>
-                  <a href="<%= up %>">
-                    <svg
-                      width="1.5em"
-                      height="1em"
-                      version="1.1"
-                      viewBox="0 0 317 259"
-                    >
-                      <use xlink:href="#folder"></use>
-                    </svg>
-                    <span class="name">..</span>
-                  </a>
-                </td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-            <% } %>
+            <tr class="file">
+              <td></td>
+              <td>
+                <a href="<%= up %>">
+                  <svg
+                    width="1.5em"
+                    height="1em"
+                    version="1.1"
+                    viewBox="0 0 265 323"
+                  >
+                    <use xlink:href="#folder"></use>
+                  </svg>
+                  <span class="name">..</span>
+                </a>
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <% } %> 
             <% files.forEach(function(file) { %>
             <tr class="file">
               <td></td>
@@ -56,7 +61,7 @@
                     width="1.5em"
                     height="1em"
                     version="1.1"
-                    viewBox="0 0 317 259"
+                    viewBox="0 0 265 323"
                   >
                     <use
                       xlink:href="#<%= file.isDir ? 'folder' : 'file' %>"
@@ -65,9 +70,24 @@
                   <span class="name"><%= file.name %></span>
                 </a>
               </td>
+              <td>
+                <% if (admin && !file.isDir) { %>
+                <span title="hide from sync" class="button" onclick="hide(this, '<%= file.full %>')">
+                  <svg width="22" height="18" version="1.1" viewBox="0 0 22 22">
+                    <use xlink:href="#visibility"></use>
+                  </svg>
+                </span>
+                <span title="delete" class="button" onclick="remove(this, '<%= file.full %>')">
+                  <svg width="20" height="20" version="1.1" viewBox="0 0 20 20">
+                    <use xlink:href="#delete"></use>
+                  </svg>
+                </span>
+                <% } %>
+              </td>
               <td><%= file.size %></td>
-              <td><time datetime="<%= file.modifiediso %>"><%= file.modified %></time></td>
-              <td></td>
+              <td>
+                <time datetime="<%= file.modifiediso %>"><%= file.modified %></time>
+              </td>
             </tr>
             <% }); %>
           </tbody>

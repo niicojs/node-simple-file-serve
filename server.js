@@ -13,6 +13,8 @@ let config = {};
 const app = express();
 app.set('view engine', 'ejs');
 
+app.use(express.json());
+
 app.use((req, res, next) => {
   try {
     let token = '';
@@ -32,14 +34,40 @@ app.use((req, res, next) => {
     if (token) {
       if (token in config.tokens) {
         const permission = config.tokens[token];
-        if (permission === 'admin' || new RegExp(permission).test(req.url)) {
-          return next();
+        if (permission === 'admin') req['user'] = 'admin';
+        if (req.url.startsWith('/api/')) {
+          if (permission === 'admin') {
+            // only admin can call api
+            next();
+          }
+        } else {
+          if (permission === 'admin' || new RegExp(permission).test(req.url)) {
+            return next();
+          }
         }
       }
     }
   } catch (e) {}
   console.log(`Unauthorized access to ${req.url}`);
   res.status(401).send('Nope');
+});
+
+app.post('/api', async (req, res) => {
+  try {
+    if (req.body.action === 'DELETE') {
+      const url = Url.parse(req.body.file);
+      const file = path.normalize(
+        path.join(config.server.wwwroot, decodeURIComponent(url.pathname))
+      );
+      if (fs.existsSync(file)) {
+        // await fs.promises.unlink(file);
+      }
+    } else if (req.body.action === 'HIDE') {
+    }
+    res.send({ ok: true });
+  } catch (e) {
+    res.status(500).send({ ok: false });
+  }
 });
 
 app.get('*', async (req, res) => {
@@ -85,6 +113,7 @@ app.get('*', async (req, res) => {
     let base = url.pathname;
     if (!url.pathname.endsWith('/')) base += '/';
     res.render('folder', {
+      admin: req['user'] === 'admin',
       up: `${Url.resolve(base, '..')}${url.query ? `?${url.query}` : ''}`,
       path: pathname,
       files
