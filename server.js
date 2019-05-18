@@ -150,6 +150,7 @@ app.get('*', async (req, res) => {
 });
 
 (async () => {
+  console.log('Starting...');
   try {
     let configlocation = 'config.json';
     let dblocation = 'db.db';
