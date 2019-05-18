@@ -1,6 +1,26 @@
 <script>
-  window.hide = (elt, file) => {
-    alert(file);
+  window.hide = async (elt, file) => {
+    const resp = await fetch('/api' + window.location.search, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ action: 'HIDE', file })
+    });
+    const result = await resp.json();
+    console.log(result);
+    if (result.ok) {
+      let tr = elt;
+      while (tr.tagName !== 'TR') {
+        tr = tr.parentNode;
+      }
+      if (result.hide) {
+        tr.classList.add('hidesync');
+      } else {
+        tr.classList.remove('hidesync');
+      }
+    }
   };
 
   window.remove = async (elt, file) => {
@@ -10,10 +30,7 @@
         Accept: 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        action: 'DELETE',
-        file
-      })
+      body: JSON.stringify({ action: 'DELETE', file })
     });
     const result = await resp.json();
     if (result.ok) {

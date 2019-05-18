@@ -53,7 +53,7 @@
             </tr>
             <% } %> 
             <% files.forEach(function(file) { %>
-            <tr class="file">
+            <tr class="file <%= file.hidden ? 'hidesync' : '' %>">
               <td></td>
               <td>
                 <a href="<%= file.full %>">

@@ -8,8 +8,11 @@ const querystring = require('querystring');
 const express = require('express');
 const formatDate = require('date-fns/format');
 const prettysize = require('prettysize');
+const level = require('level');
 
 let config = {};
+let db = undefined;
+
 const app = express();
 app.set('view engine', 'ejs');
 
@@ -22,6 +25,7 @@ app.use((req, res, next) => {
     if (auth && auth.startsWith('Basic ')) {
       token = Buffer.from(auth.substring(6), 'base64').toString();
       token = token.substring(0, token.length - 1);
+      req['sync'] = true;
     } else {
       const url = Url.parse(req.url);
       if (url.query) {
@@ -56,17 +60,31 @@ app.post('/api', async (req, res) => {
   try {
     if (req.body.action === 'DELETE') {
       const url = Url.parse(req.body.file);
-      const file = path.normalize(
-        path.join(config.server.wwwroot, decodeURIComponent(url.pathname))
-      );
+      const name = decodeURIComponent(url.pathname);
+      console.log(`Delete ${name}`);
+      const file = path.normalize(path.join(config.server.wwwroot, name));
       if (fs.existsSync(file)) {
-        // await fs.promises.unlink(file);
+        await fs.promises.unlink(file);
       }
     } else if (req.body.action === 'HIDE') {
+      const url = Url.parse(req.body.file);
+      const pathname = decodeURIComponent(url.pathname);
+      console.log(`Hide ${pathname}`);
+      const file = path.normalize(path.join(config.server.wwwroot, pathname));
+      let hidefile = true;
+      try {
+        await db.get(file);
+        await db.del(file);
+        hidefile = false;
+      } catch (e) {
+        await db.put(file, 'hide');
+      }
+      return res.send({ ok: true, hide: hidefile });
     }
     res.send({ ok: true });
   } catch (e) {
-    res.status(500).send({ ok: false });
+    console.error(e);
+    res.status(500).send({ ok: false, error: e.message });
   }
 });
 
@@ -77,7 +95,6 @@ app.get('*', async (req, res) => {
   if (!fs.existsSync(folder)) {
     res.status(404).send('Not found');
   } else if (!fs.lstatSync(folder).isDirectory()) {
-    // console.log(`Getting file ${folder}`);
     res.sendFile(folder);
   } else {
     console.log(`Listing files in ${folder}`);
@@ -86,19 +103,30 @@ app.get('*', async (req, res) => {
     for (const f of all) {
       if (!f.startsWith('.')) {
         const stats = await fs.promises.lstat(path.join(folder, f));
+        const isDir = stats.isDirectory();
         let base = url.pathname;
         if (!url.pathname.endsWith('/')) base += '/';
-        let full = Url.resolve(base, f);
-        full += stats.isDirectory() ? '/' : '';
-        full += url.query ? `?${url.query}` : '';
-        files.push({
-          name: f,
-          full,
-          isDir: stats.isDirectory(),
-          size: stats.isDirectory() ? '-' : prettysize(stats.size),
-          modifiediso: stats.mtime.toISOString(),
-          modified: formatDate(stats.mtime, 'YYYY-MM-DD HH:mm:ss')
-        });
+        let hidden = false;
+        if (!isDir) {
+          try {
+            await db.get(path.join(folder, f));
+            hidden = true;
+          } catch (e) {}
+        }
+        if (!req['sync'] || !hidden) {
+          let full = Url.resolve(base, f);
+          full += isDir ? '/' : '';
+          full += url.query ? `?${url.query}` : '';
+          files.push({
+            name: f,
+            full,
+            isDir: isDir,
+            size: isDir ? '-' : prettysize(stats.size),
+            modifiediso: stats.mtime.toISOString(),
+            modified: formatDate(stats.mtime, 'YYYY-MM-DD HH:mm:ss'),
+            hidden
+          });
+        }
       }
     }
     files.sort((a, b) => {
@@ -123,11 +151,14 @@ app.get('*', async (req, res) => {
 
 (async () => {
   let json = '{}';
+  let dblocation = 'db.db';
   if (fs.existsSync('/config/config.json')) {
     json = await fs.promises.readFile('/config/config.json', 'utf8');
+    dblocation = '/data/db.db';
   } else if (fs.existsSync('config.json')) {
     json = await fs.promises.readFile('config.json', 'utf8');
   }
+  db = level(dblocation);
   config = JSON.parse(json);
   console.log(config);
   app.listen(8080);
