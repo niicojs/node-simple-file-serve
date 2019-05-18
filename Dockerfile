@@ -1,11 +1,11 @@
-FROM node:alpine
+FROM node:12
 WORKDIR app
 
 COPY package*.json ./
+USER node
 RUN npm install --production
-COPY . ./
+COPY --chown=node:node . ./
 
 EXPOSE 8080
 
-USER node
 CMD [ "node", "server.js" ]
