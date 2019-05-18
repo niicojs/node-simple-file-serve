@@ -89,63 +89,68 @@ app.post('/api', async (req, res) => {
 });
 
 app.get('*', async (req, res) => {
-  const url = Url.parse(req.url);
-  const pathname = decodeURIComponent(url.pathname);
-  const folder = path.normalize(path.join(config.server.wwwroot, pathname));
-  if (!fs.existsSync(folder)) {
-    res.status(404).send('Not found');
-  } else if (!fs.lstatSync(folder).isDirectory()) {
-    res.sendFile(folder);
-  } else {
-    console.log(`Listing files in ${folder}`);
-    const all = await fs.promises.readdir(folder);
-    const files = [];
-    for (const f of all) {
-      if (!f.startsWith('.')) {
-        const stats = await fs.promises.lstat(path.join(folder, f));
-        const isDir = stats.isDirectory();
-        let base = url.pathname;
-        if (!url.pathname.endsWith('/')) base += '/';
-        let hidden = false;
-        if (!isDir) {
-          try {
-            await db.get(path.join(folder, f));
-            hidden = true;
-          } catch (e) {}
-        }
-        if (!req['sync'] || !hidden) {
-          let full = Url.resolve(base, f);
-          full += isDir ? '/' : '';
-          full += url.query ? `?${url.query}` : '';
-          files.push({
-            name: f,
-            full,
-            isDir: isDir,
-            size: isDir ? '-' : prettysize(stats.size),
-            modifiediso: stats.mtime.toISOString(),
-            modified: formatDate(stats.mtime, 'YYYY-MM-DD HH:mm:ss'),
-            hidden
-          });
+  try {
+    const url = Url.parse(req.url);
+    const pathname = decodeURIComponent(url.pathname);
+    const folder = path.normalize(path.join(config.server.wwwroot, pathname));
+    if (!fs.existsSync(folder)) {
+      res.status(404).send('Not found');
+    } else if (!fs.lstatSync(folder).isDirectory()) {
+      res.sendFile(folder);
+    } else {
+      console.log(`Listing files in ${folder}`);
+      const all = await fs.promises.readdir(folder);
+      const files = [];
+      for (const f of all) {
+        if (!f.startsWith('.')) {
+          const stats = await fs.promises.lstat(path.join(folder, f));
+          const isDir = stats.isDirectory();
+          let base = url.pathname;
+          if (!url.pathname.endsWith('/')) base += '/';
+          let hidden = false;
+          if (!isDir) {
+            try {
+              await db.get(path.join(folder, f));
+              hidden = true;
+            } catch (e) {}
+          }
+          if (!req['sync'] || !hidden) {
+            let full = Url.resolve(base, f);
+            full += isDir ? '/' : '';
+            full += url.query ? `?${url.query}` : '';
+            files.push({
+              name: f,
+              full,
+              isDir: isDir,
+              size: isDir ? '-' : prettysize(stats.size),
+              modifiediso: stats.mtime.toISOString(),
+              modified: formatDate(stats.mtime, 'YYYY-MM-DD HH:mm:ss'),
+              hidden
+            });
+          }
         }
       }
+      files.sort((a, b) => {
+        if (a.isDir === b.isDir) {
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        } else if (a.isDir) {
+          return -1;
+        } else {
+          return 1;
+        }
+      });
+      let base = url.pathname;
+      if (!url.pathname.endsWith('/')) base += '/';
+      res.render('folder', {
+        admin: req['user'] === 'admin',
+        up: `${Url.resolve(base, '..')}${url.query ? `?${url.query}` : ''}`,
+        path: pathname,
+        files
+      });
     }
-    files.sort((a, b) => {
-      if (a.isDir === b.isDir) {
-        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-      } else if (a.isDir) {
-        return -1;
-      } else {
-        return 1;
-      }
-    });
-    let base = url.pathname;
-    if (!url.pathname.endsWith('/')) base += '/';
-    res.render('folder', {
-      admin: req['user'] === 'admin',
-      up: `${Url.resolve(base, '..')}${url.query ? `?${url.query}` : ''}`,
-      path: pathname,
-      files
-    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send('oups');
   }
 });
 
@@ -161,7 +166,7 @@ app.get('*', async (req, res) => {
     const json = await fs.promises.readFile(configlocation, 'utf8');
     config = JSON.parse(json);
     console.log(config);
-    app.listen(8080);
+    app.listen(config.server.port);
   } catch (e) {
     console.error(e);
   }
