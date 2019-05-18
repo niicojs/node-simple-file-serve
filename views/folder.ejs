@@ -71,7 +71,7 @@
                 </a>
               </td>
               <td>
-                <% if (admin && !file.isDir) { %>
+                <% if (admin) { %>
                 <span title="hide from sync" class="button" onclick="hide(this, '<%= file.full %>')">
                   <svg width="22" height="18" version="1.1" viewBox="0 0 22 22">
                     <use xlink:href="#visibility"></use>

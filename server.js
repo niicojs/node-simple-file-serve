@@ -8,6 +8,7 @@ const querystring = require('querystring');
 const express = require('express');
 const formatDate = require('date-fns/format');
 const prettysize = require('prettysize');
+const del = require('del');
 const Datastore = require('nedb-promises');
 
 let config = {};
@@ -61,7 +62,13 @@ app.post('/api', async (req, res) => {
       console.log(`Delete ${name}`);
       const file = path.normalize(path.join(config.server.wwwroot, name));
       if (fs.existsSync(file)) {
-        await fs.promises.unlink(file);
+        const stats = await fs.promises.lstat(file);
+        if (stats.isDirectory()) {
+          console.log(`delete folder ${file}`);
+          await del(file + '**', { force: true });
+        } else {
+          await fs.promises.unlink(file);
+        }
       }
     } else if (req.body.action === 'HIDE') {
       const url = Url.parse(req.body.file);
@@ -104,14 +111,13 @@ app.get('*', async (req, res) => {
           const isDir = stats.isDirectory();
           let base = url.pathname;
           if (!url.pathname.endsWith('/')) base += '/';
-          let hidden = false;
-          if (!isDir) {
-            const exists = await db.findOne({ file: path.join(folder, f) });
-            hidden = !!exists;
-          }
+          let realpath = path.normalize(path.join(folder, f, isDir ? '/' : ''));
+          console.log(`check ${realpath}`);
+          const exists = await db.findOne({ file: realpath });
+          const hidden = !!exists;
           if (!req['sync'] || !hidden) {
             let full = Url.resolve(base, f);
-            full += isDir ? '/' : '';
+            // full += isDir ? '/' : '';
             full += url.query ? `?${url.query}` : '';
             files.push({
               name: f,
