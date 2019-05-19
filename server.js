@@ -117,7 +117,7 @@ app.get('*', async (req, res) => {
           const hidden = !!exists;
           if (!req['sync'] || !hidden) {
             let full = Url.resolve(base, f);
-            // full += isDir ? '/' : '';
+            full += isDir ? '/' : '';
             full += url.query ? `?${url.query}` : '';
             files.push({
               name: f,
