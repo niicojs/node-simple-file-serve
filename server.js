@@ -112,7 +112,6 @@ app.get('*', async (req, res) => {
           let base = url.pathname;
           if (!url.pathname.endsWith('/')) base += '/';
           let realpath = path.normalize(path.join(folder, f, isDir ? '/' : ''));
-          console.log(`check ${realpath}`);
           const exists = await db.findOne({ file: realpath });
           const hidden = !!exists;
           if (!req['sync'] || !hidden) {
