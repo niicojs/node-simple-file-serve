@@ -10,6 +10,7 @@ const formatDate = require('date-fns/format');
 const prettysize = require('prettysize');
 const del = require('del');
 const Datastore = require('nedb-promises');
+const shortid = require('shortid');
 
 let config = {};
 let db = undefined;
@@ -21,6 +22,11 @@ app.use(express.json());
 
 app.use((req, res, next) => {
   try {
+    if (req.url.startsWith('/gimme/')) {
+      // anonymous share
+      return next();
+    }
+
     let token = '';
     const auth = req.header('authorization');
     if (auth && auth.startsWith('Basic ')) {
@@ -54,38 +60,85 @@ app.use((req, res, next) => {
   res.status(401).send('Nope');
 });
 
-app.post('/api', async (req, res) => {
+app.post('/api/delete', async (req, res) => {
   try {
-    if (req.body.action === 'DELETE') {
-      const url = Url.parse(req.body.file);
-      const name = decodeURIComponent(url.pathname);
-      console.log(`Delete ${name}`);
-      const file = path.normalize(path.join(config.server.wwwroot, name));
-      if (fs.existsSync(file)) {
-        const stats = await fs.promises.lstat(file);
-        if (stats.isDirectory()) {
-          console.log(`delete folder ${file}`);
-          await del(file + '**', { force: true });
-        } else {
-          await fs.promises.unlink(file);
-        }
-      }
-    } else if (req.body.action === 'HIDE') {
-      const url = Url.parse(req.body.file);
-      const pathname = decodeURIComponent(url.pathname);
-      console.log(`Hide ${pathname}`);
-      const file = path.normalize(path.join(config.server.wwwroot, pathname));
-      let hidefile = true;
-      const exists = await db.findOne({ file });
-      if (exists) {
-        hidefile = false;
-        await db.remove({ file });
+    const url = Url.parse(req.body.file);
+    const name = decodeURIComponent(url.pathname);
+    console.log(`Delete ${name}`);
+    const file = path.normalize(path.join(config.server.wwwroot, name));
+    if (fs.existsSync(file)) {
+      const stats = await fs.promises.lstat(file);
+      if (stats.isDirectory()) {
+        console.log(`delete folder ${file}`);
+        await del(file + '**', { force: true });
       } else {
-        await db.insert({ file });
+        await fs.promises.unlink(file);
       }
-      return res.send({ ok: true, hide: hidefile });
     }
     res.send({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ ok: false, error: e.message });
+  }
+});
+
+app.post('/api/hide', async (req, res) => {
+  try {
+    const url = Url.parse(req.body.file);
+    const pathname = decodeURIComponent(url.pathname);
+    console.log(`Hide ${pathname}`);
+    const file = path.normalize(path.join(config.server.wwwroot, pathname));
+    let hidefile = true;
+    const exists = await db.findOne({ file });
+    if (exists) {
+      hidefile = !exists.hidden;
+      await db.update({ file }, { $set: { hidden: hidefile } });
+    } else {
+      await db.insert({ file, hidden: true });
+    }
+    return res.send({ ok: true, hide: hidefile });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ ok: false, error: e.message });
+  }
+});
+
+app.post('/api/share', async (req, res) => {
+  try {
+    const url = Url.parse(req.body.file);
+    const pathname = decodeURIComponent(url.pathname);
+    console.log(`Share ${pathname}`);
+    const file = path.normalize(path.join(config.server.wwwroot, pathname));
+    const exists = await db.findOne({ file });
+    let shareid = shortid.generate();
+    if (exists) {
+      if (exists.shareid) {
+        shareid = exists.shareid;
+      } else {
+        await db.update({ file }, { $set: { shareid } });
+      }
+    } else {
+      await db.insert({ file, hidden: false, shareid });
+    }
+    return res.send({ ok: true, shareid });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ ok: false, error: e.message });
+  }
+});
+
+app.get('/gimme/:hash', async (req, res) => {
+  try {
+    if (req.params.hash) {
+      const exists = await db.findOne({ shareid: req.params.hash });
+      if (exists) {
+        console.log(exists);
+        if (fs.existsSync(exists.file)) {
+          return res.download(exists.file);
+        }
+      }
+      return res.status(404).send('Not Found.');
+    }
   } catch (e) {
     console.error(e);
     res.status(500).send({ ok: false, error: e.message });
@@ -113,7 +166,7 @@ app.get('*', async (req, res) => {
           if (!url.pathname.endsWith('/')) base += '/';
           let realpath = path.normalize(path.join(folder, f, isDir ? '/' : ''));
           const exists = await db.findOne({ file: realpath });
-          const hidden = !!exists;
+          const hidden = exists ? exists.hidden : false;
           if (!req['sync'] || !hidden) {
             let full = Url.resolve(base, f);
             full += isDir ? '/' : '';

@@ -19,6 +19,7 @@
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "nedb-promises": "^3.0.5",
-    "prettysize": "^2.0.0"
+    "prettysize": "^2.0.0",
+    "shortid": "^2.2.14"
   }
 }

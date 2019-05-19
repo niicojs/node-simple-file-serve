@@ -73,6 +73,13 @@
               </td>
               <td>
                 <% if (admin) { %>
+                <span title="share" class="button" onclick="share(this, '<%= file.full %>')">
+                  <svg width="18" height="18" version="1.1" viewBox="0 0 32 32">
+                    <% if (!file.isDir) { %>
+                      <use xlink:href="#share"></use>
+                    <% } %>
+                    </svg>
+                </span>
                 <span title="hide from sync" class="button" onclick="hide(this, '<%= file.full %>')">
                   <svg width="22" height="18" version="1.1" viewBox="0 0 22 22">
                     <use xlink:href="#visibility"></use>
