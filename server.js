@@ -159,7 +159,9 @@ app.get('*', async (req, res) => {
       const all = await fs.promises.readdir(folder);
       const files = [];
       for (const f of all) {
-        if (!f.startsWith('.')) {
+        if (req['sync'] && f.endsWith('.partial~')) {
+          // don't sync partial files
+        } else if (!f.startsWith('.')) {
           const stats = await fs.promises.lstat(path.join(folder, f));
           const isDir = stats.isDirectory();
           let base = url.pathname;
