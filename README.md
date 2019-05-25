@@ -24,3 +24,14 @@ docker run -d \
     -e LETSENCRYPT_EMAIL=email \
     niico/simple-file-serve
 ```
+
+## rclone config
+
+`http` with url like `https://secrettoken@files.server.com/`
+
+## cron
+
+```
+0 9 * * 1-5 /storage/rclone copy remotefiles:/ /media/Media --log-file /storage/rclone.log --log-format INFO >/dev/null 2>&1
+30 23 * * 6 /storage/rclone copy remotefiles:/ /media/Media --log-file /storage/rclone.log --log-format INFO >/dev/null 2>&1
+```
