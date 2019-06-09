@@ -11,6 +11,7 @@ const prettysize = require('prettysize');
 const del = require('del');
 const Datastore = require('nedb-promises');
 const shortid = require('shortid');
+const fileUpload = require('express-fileupload');
 
 let config = {};
 let db = undefined;
@@ -19,7 +20,7 @@ const app = express();
 app.set('view engine', 'ejs');
 
 app.use(express.json());
-
+app.use(fileUpload());
 app.use((req, res, next) => {
   try {
     if (req.url.startsWith('/gimme/')) {
@@ -127,12 +128,24 @@ app.post('/api/share', async (req, res) => {
   }
 });
 
+app.post('/api/upload', async (req, res) => {
+  console.log('file upload');
+  const file = req.files.file;
+  // @ts-ignore
+  const name = file.name;
+  const full = path.normalize(
+    path.join(config.server.wwwroot, req.body.path, name)
+  );
+  // @ts-ignore
+  await file.mv(full);
+  res.send(path.join(req.body.path, name));
+});
+
 app.get('/gimme/:hash', async (req, res) => {
   try {
     if (req.params.hash) {
       const exists = await db.findOne({ shareid: req.params.hash });
       if (exists) {
-        console.log(exists);
         if (fs.existsSync(exists.file)) {
           return res.download(exists.file);
         }
@@ -180,7 +193,7 @@ app.get('*', async (req, res) => {
               size: isDir ? '-' : prettysize(stats.size),
               modifiediso: stats.mtime.toISOString(),
               modified: formatDate(stats.mtime, 'YYYY-MM-DD HH:mm:ss'),
-              hidden
+              hidden: req['user'] === 'admin' && hidden
             });
           }
         }

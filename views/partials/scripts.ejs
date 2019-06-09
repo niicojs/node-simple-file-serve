@@ -64,10 +64,31 @@
   window.copyurl = () => {
     const value = document.getElementById('inputshare').value;
     navigator.clipboard.writeText(value);
-  }
+  };
 
   document.addEventListener('DOMContentLoaded', () => {
     MicroModal.init();
+
+    const uploadurl = '/api/upload' + window.location.search;
+    // FilePond.setOptions({
+    //   server: uploadurl
+    // });
+    FilePond.create(document.getElementById('upload'), {
+      server: {
+        url: uploadurl,
+        process: {
+          ondata: formData => {
+            const path = document.getElementById('path').value;
+            formData.append('path', path);
+            return formData;
+          }
+        }
+      },
+      allowRevert: false,
+      allowMultiple: true
+    });
+
+    document.getElementById('dropzone').style.display = '';
   });
 </script>
 <style>
@@ -239,14 +260,17 @@
     >
       <main class="modal__content" id="share-modal-content">
         <p>
-          Use this link to share a document to someone else. Your friend will have access to this file only.
+          Use this link to share a document to someone else. Your friend will
+          have access to this file only.
         </p>
         <p>
           <input type="text" readonly id="inputshare" />
         </p>
       </main>
       <footer class="modal__footer">
-        <button class="modal__btn modal__btn-primary" onclick="copyurl()">Copy</button>
+        <button class="modal__btn modal__btn-primary" onclick="copyurl()">
+          Copy
+        </button>
         <button
           class="modal__btn"
           data-micromodal-close
@@ -258,3 +282,5 @@
     </div>
   </div>
 </div>
+<link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet" />
+<script src="https://unpkg.com/filepond/dist/filepond.js"></script>
