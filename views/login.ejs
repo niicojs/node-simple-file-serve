@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Please Login</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="icon"
+      href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QAAKqNIzIAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAHdElNRQfjBRMNJDlwfU5wAAAA3ElEQVQoz63RIUtDcRTG4efeCbuIbOowDC1LhiWTSQRRwbKPsbY1WRODwpIYLYJ+gPsBhqJYTRb7ilkQlbugf8O9XhWMO+097+8cOO9h+lVR+y2jP+a6A7E3y64dy36MWFOkY2Sl2DJwI/ne0JB61JLoeC2H9lUd5UDfk9SCuiVbuHWPyMguMRrm8Wxsw9DQJghe7DGja87lv/ccGmhyp1I02k4Ewal2CaWxyEchWnqgZ7UEPrnQLWVXEAoMtp1H6s4sGoMra4IHO6Bmop8nOasKMhmSPCIT79P43Rf7kC5A5eaiSgAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0wNS0xOVQxMTozNjo1NyswMjowMENug/wAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMDUtMTlUMTE6MzY6NTcrMDI6MDAyMztAAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAABJRU5ErkJggg=="
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <%- include ./login/styles %>
+  </head>
+  <body>
+    <div class="limiter">
+      <div class="container-login100">
+        <div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-50">
+          <form
+            class="login100-form validate-form"
+            method="POST"
+            action="/login"
+          >
+            <span class="login100-form-title p-b-33">Please Login</span>
+            <div class="wrap-input100 validate-input">
+              <input
+                class="input100"
+                type="text"
+                name="username"
+                placeholder="Login"
+              />
+              <span class="focus-input100-1"></span>
+              <span class="focus-input100-2"></span>
+            </div>
+            <div
+              class="wrap-input100 rs1 validate-input"
+              data-validate="Password is required"
+            >
+              <input
+                class="input100"
+                type="password"
+                name="password"
+                placeholder="Password"
+              />
+              <span class="focus-input100-1"></span>
+              <span class="focus-input100-2"></span>
+            </div>
+            <div class="container-login100-form-btn m-t-20">
+              <button class="login100-form-btn">Sign in</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
