@@ -36,6 +36,7 @@ module.exports.check = (req, res, next) => {
   };
   try {
     if (req.header('user-agent').startsWith('rclone/')) {
+      req.sync = true;
       if (!req.isAuthenticated()) {
         return passport.authenticate(
           'basic',
