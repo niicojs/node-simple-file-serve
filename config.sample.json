@@ -2,7 +2,8 @@
   "server": {
     "wwwroot": "/data"
   },
-  "tokens": {
-    "secret": ".*"
-  }
+  "users": [
+    { "name": "admin", "key": "secretpassword" },
+    { "name": "reader", "key": "anothersecret", "permission": "TV.*" }
+  ]
 }
