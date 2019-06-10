@@ -9,18 +9,21 @@
       },
       body: JSON.stringify({ file })
     });
-    const result = await resp.json();
-    console.log(result);
-    if (result.ok) {
-      let tr = elt;
-      while (tr.tagName !== 'TR') {
-        tr = tr.parentNode;
+    if (resp.ok) {
+      const result = await resp.json();
+      if (result.ok) {
+        let tr = elt;
+        while (tr.tagName !== 'TR') {
+          tr = tr.parentNode;
+        }
+        if (result.hide) {
+          tr.classList.add('hidesync');
+        } else {
+          tr.classList.remove('hidesync');
+        }
       }
-      if (result.hide) {
-        tr.classList.add('hidesync');
-      } else {
-        tr.classList.remove('hidesync');
-      }
+    } else {
+      window.location.reload();
     }
   };
 
@@ -33,13 +36,17 @@
       },
       body: JSON.stringify({ file })
     });
-    const result = await resp.json();
-    if (result.ok) {
-      let tr = elt;
-      while (tr.tagName !== 'TR') {
-        tr = tr.parentNode;
+    if (resp.ok) {
+      const result = await resp.json();
+      if (result.ok) {
+        let tr = elt;
+        while (tr.tagName !== 'TR') {
+          tr = tr.parentNode;
+        }
+        tr.parentNode.removeChild(tr);
       }
-      tr.parentNode.removeChild(tr);
+    } else {
+      window.location.reload();
     }
   };
 
@@ -52,12 +59,16 @@
       },
       body: JSON.stringify({ file })
     });
-    const result = await resp.json();
-    if (result.ok) {
-      console.log(result.shareid);
-      const url = `${window.location.origin}/gimme/${result.shareid}`;
-      document.getElementById('inputshare').value = url;
-      MicroModal.show('share-modal');
+    if (resp.ok) {
+      const result = await resp.json();
+      if (result.ok) {
+        console.log(result.shareid);
+        const url = `${window.location.origin}/gimme/${result.shareid}`;
+        document.getElementById('inputshare').value = url;
+        MicroModal.show('share-modal');
+      }
+    } else {
+      window.location.reload();
     }
   };
 
@@ -70,9 +81,6 @@
     MicroModal.init();
 
     const uploadurl = '/api/upload' + window.location.search;
-    // FilePond.setOptions({
-    //   server: uploadurl
-    // });
     FilePond.create(document.getElementById('upload'), {
       server: {
         url: uploadurl,
