@@ -87,7 +87,7 @@ const init = () => {
                 size: isDir ? '-' : prettysize(stats.size),
                 modifiediso: stats.mtime.toISOString(),
                 modified: formatDate(stats.mtime, 'YYYY-MM-DD HH:mm:ss'),
-                hidden: req['user'] === 'admin' && hidden
+                hidden: req.user && req.user.name === 'admin' && hidden
               });
             }
           }
@@ -104,8 +104,8 @@ const init = () => {
         let base = url.pathname;
         if (!url.pathname.endsWith('/')) base += '/';
         res.render('main', {
-          username: req['user'] ? req['user'].name : 'anonymous',
-          admin: req['user'] && req['user'].name === 'admin',
+          username: req.user ? req.user.name : 'anonymous',
+          admin: req.user && req.user.name === 'admin',
           up: `${Url.resolve(base, '..')}${url.query ? `?${url.query}` : ''}`,
           path: pathname,
           files
