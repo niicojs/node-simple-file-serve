@@ -16,7 +16,11 @@
     <header>
       <div style="overflow: auto; ">
         <h1 class="left">
-          <a href=""><%= path %></a>
+          <a href="/">/</a>
+          <% const parts = path.split('/') %>
+          <% for (let i = 1; i < parts.length - 1; i++) { %>
+          <a href="<%= '../'.repeat(parts.length - i - 2) %>"><%= parts[i] %></a>/
+          <% } %>
         </h1>
         <h1 class="right">
           <%= username %>
