@@ -23,7 +23,7 @@ module.exports.checkadmin = (req, res, next) => {
 };
 
 module.exports.check = (req, res, next) => {
-  console.log(`Auth check ${req.url}`);
+  // console.log(`Auth check ${req.url}`);
   const validate = user => {
     if (user.name === 'admin') {
       return next();
@@ -67,12 +67,6 @@ module.exports.init = (config, app, passport) => {
 
   passport.serializeUser((user, cb) => cb(null, JSON.stringify(user)));
   passport.deserializeUser((str, cb) => cb(null, JSON.parse(str)));
-
-  // app.use((req, res, next) => {
-  //   console.log(req.body);
-  //   req.flash = (msg, detail) => console.log(`${msg} - ${detail}`);
-  //   next();
-  // });
 
   app.use(passport.initialize());
   app.use(passport.session());

@@ -36,7 +36,7 @@ const init = () => {
   app.get('/gimme/:hash', async (req, res) => {
     try {
       if (req.params.hash) {
-        const exists = await db.findOne({ shareid: req.params.hash });
+        const exists = await db.findOne({ shareid: req.params.hash }).exec();
         if (exists) {
           if (fs.existsSync(exists.file)) {
             return res.download(exists.file);
@@ -87,7 +87,7 @@ const init = () => {
                 size: isDir ? '-' : prettysize(stats.size),
                 modifiediso: stats.mtime.toISOString(),
                 modified: formatDate(stats.mtime, 'YYYY-MM-DD HH:mm:ss'),
-                hidden: req.user && req.user.name === 'admin' && hidden
+                hidden: req.user && req.user['name'] === 'admin' && hidden
               });
             }
           }
@@ -104,8 +104,8 @@ const init = () => {
         let base = url.pathname;
         if (!url.pathname.endsWith('/')) base += '/';
         res.render('main', {
-          username: req.user ? req.user.name : 'anonymous',
-          admin: req.user && req.user.name === 'admin',
+          username: req.user ? req.user['name'] : 'anonymous',
+          admin: req.user && req.user['name'] === 'admin',
           up: `${Url.resolve(base, '..')}${url.query ? `?${url.query}` : ''}`,
           path: pathname,
           files
@@ -140,6 +140,8 @@ const init = () => {
     init();
 
     app.listen(config.server.port);
+
+    console.log(`Listening on port ${config.server.port}`);
   } catch (e) {
     console.error(e);
   }
