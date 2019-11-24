@@ -81,14 +81,26 @@
                 </a>
               </td>
               <td>
-                <% if (admin) { %>
-                <span title="share" class="button" onclick="share(this, '<%= file.full %>')">
-                  <svg width="18" height="18" version="1.1" viewBox="0 0 32 32">
-                    <% if (!file.isDir) { %>
-                      <use xlink:href="#share"></use>
-                    <% } %>
+                <% if (file.isVideo) { %>
+                  <span title="play" class="button" 
+                        onclick="window.location.replace('/play<%= file.full %>')">
+                    <svg width="22" height="22" version="1.1" viewBox="-100 -100 450 450">
+                      <use xlink:href="#video"></use>
                     </svg>
-                </span>
+                  </span>
+                <% } else { %>
+                  <span style="display:inline-block;min-width:22px"></span>
+                <% } %>
+                <% if (admin) { %>
+                <% if (!file.isDir) { %>
+                  <span title="share" class="button" onclick="share(this, '<%= file.full %>')">
+                    <svg width="18" height="18" version="1.1" viewBox="0 0 32 32">
+                      <use xlink:href="#share"></use>
+                    </svg>
+                  </span>
+                <% } else { %>
+                  <span style="display:inline-block;min-width:18px"></span>
+                <% } %>
                 <span title="hide from sync" class="button" onclick="hide(this, '<%= file.full %>')">
                   <svg width="22" height="18" version="1.1" viewBox="0 0 22 22">
                     <use xlink:href="#visibility"></use>

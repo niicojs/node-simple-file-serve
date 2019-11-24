@@ -15,7 +15,7 @@ const passport = require('passport');
 const auth = require('./server/auth');
 const api = require('./server/api');
 
-const config = { server: { port: 8080 }, users: [] };
+const config = { server: { port: 8080 }, options: {}, users: [] };
 let db = undefined;
 
 const app = express();
@@ -33,6 +33,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 
 const isVideo = name => {
+  if (!config.options.player) return false;
+
   const lname = name.toLowerCase();
   return (
     lname.endsWith('.avi') || lname.endsWith('.mp4') || lname.endsWith('mkv')
