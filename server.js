@@ -32,6 +32,13 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 
+const isVideo = name => {
+  const lname = name.toLowerCase();
+  return (
+    lname.endsWith('.avi') || lname.endsWith('.mp4') || lname.endsWith('mkv')
+  );
+};
+
 const init = () => {
   app.get('/gimme/:hash', async (req, res) => {
     try {
@@ -48,6 +55,11 @@ const init = () => {
       console.error(e);
       res.status(500).send({ ok: false, error: e.message });
     }
+  });
+
+  app.get('/play/*', auth.check, (req, res) => {
+    const file = req.params[0];
+    res.render('player', { file });
   });
 
   app.get('*', auth.check, async (req, res) => {
@@ -84,6 +96,7 @@ const init = () => {
                 name: f,
                 full,
                 isDir: isDir,
+                isVideo: !isDir && isVideo(f),
                 size: isDir ? '-' : prettysize(stats.size),
                 modifiediso: stats.mtime.toISOString(),
                 modified: formatDate(stats.mtime, 'YYYY-MM-DD HH:mm:ss'),
