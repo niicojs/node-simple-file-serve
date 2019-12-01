@@ -1,5 +1,7 @@
 # simple file serve
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/niicojs/node-simple-file-serve.svg)](https://greenkeeper.io/)
+
 Small UI to browse file on a remote server.  
 Compatible with [rclone](https://rclone.org/) http sync.
 
