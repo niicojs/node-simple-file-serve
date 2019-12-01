@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const Url = require('url');
 const express = require('express');
-const formatDate = require('date-fns/format');
+const { format: formatDate } = require('date-fns');
 const prettysize = require('prettysize');
 const Datastore = require('nedb-promises');
 const fileUpload = require('express-fileupload');
@@ -101,7 +101,7 @@ const init = () => {
                 isVideo: !isDir && isVideo(f),
                 size: isDir ? '-' : prettysize(stats.size),
                 modifiediso: stats.mtime.toISOString(),
-                modified: formatDate(stats.mtime, 'YYYY-MM-DD HH:mm:ss'),
+                modified: formatDate(stats.mtime, 'yyyy-MM-dd HH:mm:ss'),
                 hidden: req.user && req.user['name'] === 'admin' && hidden
               });
             }
