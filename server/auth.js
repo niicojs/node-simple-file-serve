@@ -3,9 +3,9 @@ const passport = require('passport');
 const { BasicStrategy } = require('passport-http');
 const { Strategy: LocalStrategy } = require('passport-local');
 
-const authenticate = config => (username, password, done) => {
+const authenticate = (config) => (username, password, done) => {
   const user = config.users.find(
-    u => u.name === username && u.key === password
+    (u) => u.name === username && u.key === password
   );
   if (user) {
     return done(null, user);
@@ -24,7 +24,7 @@ module.exports.checkadmin = (req, res, next) => {
 
 module.exports.check = (req, res, next) => {
   // console.log(`Auth check ${req.url}`);
-  const validate = user => {
+  const validate = (user) => {
     if (user.name === 'admin') {
       return next();
     } else {

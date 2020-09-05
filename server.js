@@ -25,14 +25,14 @@ app.use(
   expressSession({
     secret: 'secret stuff',
     resave: true,
-    saveUninitialized: false
+    saveUninitialized: false,
   })
 );
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 
-const isVideo = name => {
+const isVideo = (name) => {
   if (!config.options.player) return false;
 
   const lname = name.toLowerCase();
@@ -102,7 +102,7 @@ const init = () => {
                 size: isDir ? '-' : prettysize(stats.size),
                 modifiediso: stats.mtime.toISOString(),
                 modified: formatDate(stats.mtime, 'yyyy-MM-dd HH:mm:ss'),
-                hidden: req.user && req.user['name'] === 'admin' && hidden
+                hidden: req.user && req.user['name'] === 'admin' && hidden,
               });
             }
           }
@@ -123,7 +123,7 @@ const init = () => {
           admin: req.user && req.user['name'] === 'admin',
           up: `${Url.resolve(base, '..')}${url.query ? `?${url.query}` : ''}`,
           path: pathname,
-          files
+          files,
         });
       }
     } catch (e) {

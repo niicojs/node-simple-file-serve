@@ -1,6 +1,6 @@
 // @ts-check
 const fs = require('fs');
-const path = require('path');
+const path = require('path').posix;
 const Url = require('url');
 const del = require('del');
 const shortid = require('shortid');
@@ -14,7 +14,7 @@ module.exports.init = (config, db, app, passport) => {
       const url = Url.parse(req.body.file);
       const name = decodeURIComponent(url.pathname);
       console.log(`Delete ${name}`);
-      const file = path.posix.normalize(path.posix.join(config.server.wwwroot, name));
+      const file = path.normalize(path.join(config.server.wwwroot, name));
       if (fs.existsSync(file)) {
         const stats = await fs.promises.lstat(file);
         if (stats.isDirectory()) {
@@ -38,7 +38,7 @@ module.exports.init = (config, db, app, passport) => {
       const url = Url.parse(req.body.file);
       const pathname = decodeURIComponent(url.pathname);
       console.log(`Hide ${pathname}`);
-      const file = path.posix.normalize(path.posix.join(config.server.wwwroot, pathname));
+      const file = path.normalize(path.join(config.server.wwwroot, pathname));
       let hidefile = true;
       const exists = await db.findOne({ file });
       if (exists) {
@@ -59,7 +59,7 @@ module.exports.init = (config, db, app, passport) => {
       const url = Url.parse(req.body.file);
       const pathname = decodeURIComponent(url.pathname);
       console.log(`Share ${pathname}`);
-      const file = path.posix.normalize(path.posix.join(config.server.wwwroot, pathname));
+      const file = path.normalize(path.join(config.server.wwwroot, pathname));
       const exists = await db.findOne({ file });
       let shareid = shortid.generate();
       if (exists) {
@@ -83,11 +83,11 @@ module.exports.init = (config, db, app, passport) => {
     const file = req.files.file;
     // @ts-ignore
     const name = file.name;
-    const full = path.posix.normalize(
-      path.posix.join(config.server.wwwroot, req.body.path, name)
+    const full = path.normalize(
+      path.join(config.server.wwwroot, req.body.path, name)
     );
     // @ts-ignore
     await file.mv(full);
-    res.send(path.posix.join(req.body.path, name));
+    res.send(path.join(req.body.path, name));
   });
 };
