@@ -14,18 +14,19 @@
   },
   "dependencies": {
     "body-parser": "^1.19.0",
-    "date-fns": "^2.16.1",
-    "del": "^5.1.0",
-    "dotenv": "^8.2.0",
-    "ejs": "^3.1.5",
+    "date-fns": "^2.23.0",
+    "del": "^6.0.0",
+    "dotenv": "^10.0.0",
+    "ejs": "^3.1.6",
     "express": "^4.17.1",
-    "express-fileupload": "^1.2.0",
-    "express-session": "^1.17.1",
-    "nedb-promises": "^4.0.4",
+    "express-fileupload": "^1.2.1",
+    "express-session": "^1.17.2",
+    "is-path-inside": "^3",
+    "nedb-promises": "^5.0.0",
     "passport": "^0.4.1",
     "passport-http": "^0.3.0",
     "passport-local": "^1.0.0",
     "prettysize": "^2.0.0",
-    "shortid": "^2.2.15"
+    "shortid": "^2.2.16"
   }
 }

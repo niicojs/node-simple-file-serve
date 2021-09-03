@@ -9,7 +9,6 @@ const { format: formatDate } = require('date-fns');
 const prettysize = require('prettysize');
 const Datastore = require('nedb-promises');
 const fileUpload = require('express-fileupload');
-const bodyParser = require('body-parser');
 const expressSession = require('express-session');
 const passport = require('passport');
 const auth = require('./server/auth');
@@ -28,8 +27,8 @@ app.use(
     saveUninitialized: false,
   })
 );
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 
 const isVideo = (name) => {

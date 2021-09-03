@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path').posix;
 const Url = require('url');
+const isPathInside = require('is-path-inside');
 const del = require('del');
 const shortid = require('shortid');
 const auth = require('./auth');
@@ -16,14 +17,21 @@ module.exports.init = (config, db, app, passport) => {
       console.log(`Delete ${name}`);
       const file = path.normalize(path.join(config.server.wwwroot, name));
       if (fs.existsSync(file)) {
-        const stats = await fs.promises.lstat(file);
-        if (stats.isDirectory()) {
-          console.log(`delete folder ${file}`);
-          await del(file, { force: true });
+        if (!isPathInside(file, config.server.wwwroot)) {
+          res.status(403).send({ ok: false });
         } else {
-          await fs.promises.unlink(file);
+          const stats = await fs.promises.lstat(file);
+          if (stats.isDirectory()) {
+            console.log(`delete folder ${file}`);
+            const deleted = await del(file, { force: true });
+            for (const f of deleted) {
+              console.log(`  ${f}`);
+            }
+          } else {
+            await fs.promises.unlink(file);
+          }
+          res.send({ ok: true });
         }
-        res.send({ ok: true });
       } else {
         res.status(404).send({ ok: false });
       }

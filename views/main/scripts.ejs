@@ -5,9 +5,9 @@
       method: 'POST',
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ file })
+      body: JSON.stringify({ file }),
     });
     if (resp.ok) {
       const result = await resp.json();
@@ -32,9 +32,9 @@
       method: 'POST',
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ file })
+      body: JSON.stringify({ file }),
     });
     if (resp.ok) {
       const result = await resp.json();
@@ -46,7 +46,7 @@
         tr.parentNode.removeChild(tr);
       }
     } else {
-      window.location.reload();
+      // window.location.reload();
     }
   };
 
@@ -55,9 +55,9 @@
       method: 'POST',
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ file })
+      body: JSON.stringify({ file }),
     });
     if (resp.ok) {
       const result = await resp.json();
@@ -85,15 +85,15 @@
       server: {
         url: uploadurl,
         process: {
-          ondata: formData => {
+          ondata: (formData) => {
             const path = document.getElementById('path').value;
             formData.append('path', path);
             return formData;
-          }
-        }
+          },
+        },
       },
       allowRevert: false,
-      allowMultiple: true
+      allowMultiple: true,
     });
 
     document.getElementById('dropzone').style.display = '';
