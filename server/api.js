@@ -3,7 +3,6 @@ const fs = require('fs');
 const path = require('path').posix;
 const Url = require('url');
 const isPathInside = require('is-path-inside');
-const del = require('del');
 const shortid = require('shortid');
 const auth = require('./auth');
 
@@ -23,10 +22,7 @@ module.exports.init = (config, db, app, passport) => {
           const stats = await fs.promises.lstat(file);
           if (stats.isDirectory()) {
             console.log(`delete folder ${file}`);
-            const deleted = await del(file, { force: true });
-            for (const f of deleted) {
-              console.log(`  ${f}`);
-            }
+            await fs.promises.rm(file, { recursive: true, force: true });
           } else {
             await fs.promises.unlink(file);
           }
