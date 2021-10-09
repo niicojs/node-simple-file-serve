@@ -19,13 +19,18 @@ module.exports.init = (config, db, app, passport) => {
         if (!isPathInside(file, config.server.wwwroot)) {
           res.status(403).send({ ok: false });
         } else {
-          const stats = await fs.promises.lstat(file);
-          if (stats.isDirectory()) {
-            console.log(`delete folder ${file}`);
-            await fs.promises.rm(file, { recursive: true, force: true });
-          } else {
-            await fs.promises.unlink(file);
-          }
+          const supprime = async (file) => {
+            const stats = await fs.promises.lstat(file);
+            if (stats.isDirectory()) {
+              const files = await fs.promises.readdir(file);
+              for (const sub of files) {
+                await supprime(path.join(file, sub));
+              }
+            } else {
+              await fs.promises.unlink(file);
+            }
+          };
+          await supprime(file);
           res.send({ ok: true });
         }
       } else {
