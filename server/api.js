@@ -12,7 +12,7 @@ module.exports.init = (config, db, app, passport) => {
   app.post('/api/delete', async (req, res) => {
     try {
       const url = Url.parse(req.body.file);
-      const name = decodeURIComponent(url.pathname);
+      const name = decodeURIComponent(url.pathname || '');
       console.log(`Delete ${name}`);
       const file = path.normalize(path.join(config.server.wwwroot, name));
       if (fs.existsSync(file)) {
@@ -26,6 +26,7 @@ module.exports.init = (config, db, app, passport) => {
               for (const sub of files) {
                 await supprime(path.join(file, sub));
               }
+              await fs.promises.rmdir(file);
             } else {
               await fs.promises.unlink(file);
             }
@@ -45,7 +46,7 @@ module.exports.init = (config, db, app, passport) => {
   app.post('/api/hide', async (req, res) => {
     try {
       const url = Url.parse(req.body.file);
-      const pathname = decodeURIComponent(url.pathname);
+      const pathname = decodeURIComponent(url.pathname || '');
       console.log(`Hide ${pathname}`);
       const file = path.normalize(path.join(config.server.wwwroot, pathname));
       let hidefile = true;
@@ -66,7 +67,7 @@ module.exports.init = (config, db, app, passport) => {
   app.post('/api/share', async (req, res) => {
     try {
       const url = Url.parse(req.body.file);
-      const pathname = decodeURIComponent(url.pathname);
+      const pathname = decodeURIComponent(url.pathname || '');
       console.log(`Share ${pathname}`);
       const file = path.normalize(path.join(config.server.wwwroot, pathname));
       const exists = await db.findOne({ file });
