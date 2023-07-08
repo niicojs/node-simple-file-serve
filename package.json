@@ -13,10 +13,10 @@
     "singleQuote": true
   },
   "dependencies": {
-    "body-parser": "^1.20.1",
-    "date-fns": "^2.29.3",
-    "dotenv": "^16.0.3",
-    "ejs": "^3.1.8",
+    "body-parser": "^1.20.2",
+    "date-fns": "^2.30.0",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0",
     "express-session": "^1.17.3",
