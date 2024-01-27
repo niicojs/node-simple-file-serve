@@ -100,4 +100,8 @@ export function init(config, db, app, passport) {
     await file.mv(full);
     res.send(path.join(req.body.path, name));
   });
+
+  app.get('/api/version', async (_, res) => {
+    return res.send('2024-01-27 19:48:00');
+  });
 }
