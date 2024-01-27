@@ -3,7 +3,6 @@ import 'dotenv/config';
 
 import { existsSync, lstatSync, promises } from 'fs';
 import { normalize, join } from 'path';
-import { resolve } from 'url';
 import express, { urlencoded } from 'express';
 import { format as formatDate } from 'date-fns';
 import prettysize from 'prettysize';
@@ -11,7 +10,7 @@ import Datastore from 'nedb-promises';
 import fileUpload from 'express-fileupload';
 import expressSession from 'express-session';
 import passport from 'passport';
-import { getQuery, normalizeURL, parseURL, withQuery } from 'ufo';
+import { getQuery, normalizeURL, parseURL, withQuery, resolveURL } from 'ufo';
 import { check, init as authinit } from './server/auth.js';
 import { init as apiinit } from './server/api.js';
 
@@ -90,7 +89,7 @@ const init = () => {
             const exists = await db.findOne({ file: realpath });
             const hidden = exists ? exists.hidden : false;
             if (!req['sync'] || !hidden) {
-              let full = normalizeURL(resolve(base, f));
+              let full = normalizeURL(resolveURL(base, f));
               full += isDir ? '/' : '';
               full = withQuery(full, query);
               files.push({
@@ -120,7 +119,7 @@ const init = () => {
         res.render('main', {
           username: req.user ? req.user['name'] : 'anonymous',
           admin: req.user && req.user['name'] === 'admin',
-          up: withQuery(`${resolve(base, '..')}`, query),
+          up: withQuery(`${resolveURL(base, '..')}`, query),
           path: pathname,
           files,
         });
