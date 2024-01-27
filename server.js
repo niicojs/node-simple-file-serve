@@ -1,18 +1,19 @@
 // @ts-check
-require('dotenv').config();
+import 'dotenv/config';
 
-const fs = require('fs');
-const path = require('path');
-const Url = require('url');
-const express = require('express');
-const { format: formatDate } = require('date-fns');
-const prettysize = require('prettysize');
-const Datastore = require('nedb-promises');
-const fileUpload = require('express-fileupload');
-const expressSession = require('express-session');
-const passport = require('passport');
-const auth = require('./server/auth');
-const api = require('./server/api');
+import { existsSync, lstatSync, promises } from 'fs';
+import { normalize, join } from 'path';
+import { resolve } from 'url';
+import express, { urlencoded } from 'express';
+import { format as formatDate } from 'date-fns';
+import prettysize from 'prettysize';
+import Datastore from 'nedb-promises';
+import fileUpload from 'express-fileupload';
+import expressSession from 'express-session';
+import passport from 'passport';
+import { getQuery, normalizeURL, parseURL, withQuery } from 'ufo';
+import { check, init as authinit } from './server/auth.js';
+import { init as apiinit } from './server/api.js';
 
 const config = { server: { port: 8080 }, options: {}, users: [] };
 let db = undefined;
@@ -27,7 +28,7 @@ app.use(
     saveUninitialized: false,
   })
 );
-app.use(express.urlencoded({ extended: true }));
+app.use(urlencoded({ extended: true }));
 app.use(express.json());
 app.use(fileUpload());
 
@@ -46,7 +47,7 @@ const init = () => {
       if (req.params.hash) {
         const exists = await db.findOne({ shareid: req.params.hash }).exec();
         if (exists) {
-          if (fs.existsSync(exists.file)) {
+          if (existsSync(exists.file)) {
             return res.download(exists.file);
           }
         }
@@ -58,41 +59,40 @@ const init = () => {
     }
   });
 
-  app.get('/play/*', auth.check, (req, res) => {
+  app.get('/play/*', check, (req, res) => {
     const file = req.params[0];
     res.render('player', { file });
   });
 
-  app.get('*', auth.check, async (req, res) => {
+  app.get('*', check, async (req, res) => {
     try {
-      const url = Url.parse(req.url);
+      const url = parseURL(req.url);
+      const query = getQuery(req.url);
       const pathname = decodeURIComponent(url.pathname);
-      const folder = path.normalize(path.join(config.server.wwwroot, pathname));
-      if (!fs.existsSync(folder)) {
+      const folder = normalize(join(config.server.wwwroot, pathname));
+      if (!existsSync(folder)) {
         res.status(404).send('Not found');
-      } else if (!fs.lstatSync(folder).isDirectory()) {
+      } else if (!lstatSync(folder).isDirectory()) {
         res.sendFile(folder);
       } else {
         console.log(`Listing files in ${folder}`);
-        const all = await fs.promises.readdir(folder);
+        const all = await promises.readdir(folder);
         const files = [];
         for (const f of all) {
           if (req['sync'] && f.endsWith('.partial~')) {
             // don't sync partial files
           } else if (!f.startsWith('.')) {
-            const stats = await fs.promises.lstat(path.join(folder, f));
+            const stats = await promises.lstat(join(folder, f));
             const isDir = stats.isDirectory();
             let base = url.pathname;
             if (!url.pathname.endsWith('/')) base += '/';
-            let realpath = path.normalize(
-              path.join(folder, f, isDir ? '/' : '')
-            );
+            let realpath = normalize(join(folder, f, isDir ? '/' : ''));
             const exists = await db.findOne({ file: realpath });
             const hidden = exists ? exists.hidden : false;
             if (!req['sync'] || !hidden) {
-              let full = Url.resolve(base, f);
+              let full = normalizeURL(resolve(base, f));
               full += isDir ? '/' : '';
-              full += url.query ? `?${url.query}` : '';
+              full = withQuery(full, query);
               files.push({
                 name: f,
                 full,
@@ -120,7 +120,7 @@ const init = () => {
         res.render('main', {
           username: req.user ? req.user['name'] : 'anonymous',
           admin: req.user && req.user['name'] === 'admin',
-          up: `${Url.resolve(base, '..')}${url.query ? `?${url.query}` : ''}`,
+          up: withQuery(`${resolve(base, '..')}`, query),
           path: pathname,
           files,
         });
@@ -137,20 +137,20 @@ const init = () => {
   try {
     let configlocation = 'config.json';
     let dblocation = 'db.db';
-    if (fs.existsSync('/config/config.json')) {
+    if (existsSync('/config/config.json')) {
       configlocation = '/config/config.json';
       dblocation = '/data/db.db';
     }
 
-    db = new Datastore({ filename: dblocation, autoload: true });
+    db = Datastore.create({ filename: dblocation, autoload: true });
 
-    const json = await fs.promises.readFile(configlocation, 'utf8');
+    const json = await promises.readFile(configlocation, 'utf8');
     const parsed = JSON.parse(json);
     Object.assign(config, parsed);
     console.log(config);
 
-    auth.init(config, app, passport);
-    api.init(config, db, app, passport);
+    authinit(config, app, passport);
+    apiinit(config, db, app, passport);
     init();
 
     app.listen(config.server.port);

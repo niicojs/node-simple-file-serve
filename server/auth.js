@@ -1,7 +1,7 @@
 // @ts-check
-const passport = require('passport');
-const { BasicStrategy } = require('passport-http');
-const { Strategy: LocalStrategy } = require('passport-local');
+import passport from 'passport';
+import { BasicStrategy } from 'passport-http';
+import { Strategy as LocalStrategy } from 'passport-local';
 
 const authenticate = (config) => (username, password, done) => {
   const user = config.users.find(
@@ -14,15 +14,15 @@ const authenticate = (config) => (username, password, done) => {
   }
 };
 
-module.exports.checkadmin = (req, res, next) => {
+export function checkadmin(req, res, next) {
   if (req.isAuthenticated() && req['user'].name === 'admin') {
     return next();
   } else {
     res.status(401).send('Nope');
   }
-};
+}
 
-module.exports.check = (req, res, next) => {
+export function check(req, res, next) {
   // console.log(`Auth check ${req.url}`);
   const validate = (user) => {
     if (user.name === 'admin') {
@@ -59,9 +59,9 @@ module.exports.check = (req, res, next) => {
 
   console.log(`Unauthorized access to ${req.url}`);
   res.redirect('/login');
-};
+}
 
-module.exports.init = (config, app, passport) => {
+export function init(config, app, passport) {
   passport.use(new LocalStrategy(authenticate(config)));
   passport.use(new BasicStrategy(authenticate(config)));
 
@@ -78,4 +78,4 @@ module.exports.init = (config, app, passport) => {
     passport.authenticate('local', { failureRedirect: '/login' }),
     (_, res) => res.redirect('/')
   );
-};
+}
