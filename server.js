@@ -95,6 +95,7 @@ const init = () => {
               files.push({
                 name: f,
                 full,
+                fullJs: full.replace("'", "\\'"),
                 isDir: isDir,
                 isVideo: !isDir && isVideo(f),
                 size: isDir ? '-' : prettysize(stats.size),
