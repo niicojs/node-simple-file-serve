@@ -1,4 +1,3 @@
-// @ts-check
 import 'dotenv/config';
 
 import { existsSync, lstatSync, promises } from 'fs';
@@ -14,7 +13,7 @@ import { getQuery, normalizeURL, parseURL, withQuery, resolveURL } from 'ufo';
 import { check, init as authinit } from './server/auth.js';
 import { init as apiinit } from './server/api.js';
 
-const config = { server: { port: 8080 }, options: {}, users: [] };
+const config = { server: { port: 3000 }, options: {}, users: [] };
 let db = undefined;
 
 const app = express();
@@ -95,7 +94,7 @@ const init = () => {
               files.push({
                 name: f,
                 full,
-                fullJs: full.replace("'", "\\'"),
+                fullJs: full.replaceAll("'", "\\'"),
                 isDir: isDir,
                 isVideo: !isDir && isVideo(f),
                 size: isDir ? '-' : prettysize(stats.size),
