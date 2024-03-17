@@ -88,7 +88,7 @@ const init = () => {
             const exists = await db.findOne({ file: realpath });
             const hidden = exists ? exists.hidden : false;
             if (!req['sync'] || !hidden) {
-              let full = normalizeURL(resolveURL(base, f));
+              let full = normalizeURL(resolveURL(base, encodeURIComponent(f)));
               full += isDir ? '/' : '';
               full = withQuery(full, query);
               files.push({

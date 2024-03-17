@@ -102,6 +102,6 @@ export function init(config, db, app, passport) {
   });
 
   app.get('/api/version', async (_, res) => {
-    return res.send('2024-03-01 07:48:00');
+    return res.send('2024-03-17 13:08:00');
   });
 }
