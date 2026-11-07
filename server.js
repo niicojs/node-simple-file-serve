@@ -1,17 +1,18 @@
 import 'dotenv/config';
-
 import { existsSync, lstatSync, promises } from 'fs';
 import { normalize, join } from 'path';
-import express, { urlencoded } from 'express';
+
 import { format as formatDate } from 'date-fns';
-import prettysize from 'prettysize';
-import Datastore from 'nedb-promises';
+import express, { urlencoded } from 'express';
 import fileUpload from 'express-fileupload';
 import expressSession from 'express-session';
+import Datastore from 'nedb-promises';
 import passport from 'passport';
+import prettysize from 'prettysize';
 import { getQuery, normalizeURL, parseURL, withQuery, resolveURL } from 'ufo';
-import { check, init as authinit } from './server/auth.js';
+
 import { init as apiinit } from './server/api.js';
+import { check, init as authinit } from './server/auth.js';
 
 const config = { server: { port: 3000 }, options: {}, users: [] };
 let db = undefined;
@@ -24,7 +25,7 @@ app.use(
     secret: 'secret stuff',
     resave: true,
     saveUninitialized: false,
-  })
+  }),
 );
 app.use(urlencoded({ extended: true }));
 app.use(express.json());
@@ -34,9 +35,7 @@ const isVideo = (name) => {
   if (!config.options.player) return false;
 
   const lname = name.toLowerCase();
-  return (
-    lname.endsWith('.avi') || lname.endsWith('.mp4') || lname.endsWith('mkv')
-  );
+  return lname.endsWith('.avi') || lname.endsWith('.mp4') || lname.endsWith('mkv');
 };
 
 const init = () => {

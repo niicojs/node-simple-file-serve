@@ -4,9 +4,7 @@ import { BasicStrategy } from 'passport-http';
 import { Strategy as LocalStrategy } from 'passport-local';
 
 const authenticate = (config) => (username, password, done) => {
-  const user = config.users.find(
-    (u) => u.name === username && u.key === password
-  );
+  const user = config.users.find((u) => u.name === username && u.key === password);
   if (user) {
     return done(null, user);
   } else {
@@ -38,15 +36,11 @@ export function check(req, res, next) {
     if (req.header('user-agent')?.startsWith('rclone/')) {
       req.sync = true;
       if (!req.isAuthenticated()) {
-        return passport.authenticate(
-          'basic',
-          { session: false },
-          (err, user) => {
-            if (err) res.status(400).send('Oups');
-            else if (user) validate(user);
-            else res.status(401).send('Nope');
-          }
-        )(req, res, next);
+        return passport.authenticate('basic', { session: false }, (err, user) => {
+          if (err) res.status(400).send('Oups');
+          else if (user) validate(user);
+          else res.status(401).send('Nope');
+        })(req, res, next);
       } else {
         console.log('rclone but authenticated?');
       }
@@ -73,9 +67,5 @@ export function init(config, app, passport) {
 
   app.get('/login', (_, res) => res.render('login'));
 
-  app.post(
-    '/login',
-    passport.authenticate('local', { failureRedirect: '/login' }),
-    (_, res) => res.redirect('/')
-  );
+  app.post('/login', passport.authenticate('local', { failureRedirect: '/login' }), (_, res) => res.redirect('/'));
 }

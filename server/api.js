@@ -1,9 +1,11 @@
 // @ts-check
 import { existsSync, promises } from 'fs';
 import { posix as path } from 'path';
-import { $URL } from 'ufo';
+
 import isPathInside from 'is-path-inside';
 import { generate } from 'shortid';
+import { $URL } from 'ufo';
+
 import { checkadmin } from './auth.js';
 
 export function init(config, db, app, passport) {
@@ -93,9 +95,7 @@ export function init(config, db, app, passport) {
     const file = req.files.file;
     // @ts-ignore
     const name = file.name;
-    const full = path.normalize(
-      path.join(config.server.wwwroot, req.body.path, name)
-    );
+    const full = path.normalize(path.join(config.server.wwwroot, req.body.path, name));
     // @ts-ignore
     await file.mv(full);
     res.send(path.join(req.body.path, name));
